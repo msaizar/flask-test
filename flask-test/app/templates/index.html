@@ -1,53 +1,289 @@
 {% extends "base.html" %}
 
+{% block extra_js %}
+
+<script type="text/javascript">
+
+    function FeaturesViewModel() {
+        var self = this;
+        self.featuresURI = '/features/';
+        self.features = ko.observableArray();
+        self.show = ko.observable(true);
+        
+        
+        self.ajax = function(uri, method, data) {
+            var csrftoken = $('meta[name=csrf-token]').attr('content')
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+            var request = {
+                url: uri,
+                type: method,
+                contentType: "application/json",
+                accepts: "application/json",
+                cache: false,
+                dataType: 'json',
+                data: JSON.stringify(data),
+                error: function(jqXHR) {
+                    console.log("ajax error " + jqXHR.status);
+                }
+            };
+            return $.ajax(request);
+        }
+
+        self.beginAdd = function() {
+            self.show(false);
+            featureFormViewModel.cleanForm();
+            featureFormViewModel.show(true);
+        }
+        self.beginEdit = function(feature) {
+            self.show(false);
+            featureFormViewModel.setForm(feature);
+            featureFormViewModel.show(true);
+        }
+
+        self.remove = function(feature) {
+            var uri = self.featuresURI + feature.id();
+            self.ajax(uri, 'DELETE', feature).done(function(data) {
+                self.features.remove(feature);
+            });
+        }
+
+        self.initFeaturesArray = function(data) {
+            self.features.removeAll();
+            for (var i = 0; i < data.features.length; i++) {
+                self.features.push({
+                    id: ko.observable(data.features[i].id),
+                    title: ko.observable(data.features[i].title),
+                    description: ko.observable(data.features[i].description),
+                    client: ko.observable(data.features[i].client),
+                    client_priority: ko.observable(data.features[i].client_priority),
+                    target_date: ko.observable(data.features[i].target_date),
+                    product_area: ko.observable(data.features[i].product_area)
+                });
+            }
+            featureFormViewModel.show(false);
+            self.show(true);
+            
+        }
+        self.ajax(self.featuresURI, 'GET').done(function(data) {
+            self.initFeaturesArray(data);
+        });
+
+
+        self.saveFeature = function(feature) {
+            if (feature.id != undefined) {
+                var uri = self.featuresURI + feature.id;
+                var method = 'PUT';
+            }
+            else {
+                var uri = self.featuresURI;
+                var method = 'POST';
+            }
+            self.ajax(uri, method, feature).done(function(data) {
+                self.initFeaturesArray(data);
+            }).fail(function (data) {
+                featureFormViewModel.formErrors(data.responseJSON);
+            });
+        }
+    }
+
+
+    function FeatureFormViewModel() {
+        var self = this;
+        self.id = ko.observable();
+        self.title = ko.observable();
+        self.description = ko.observable();
+        self.client = ko.observable();
+        self.client_priority = ko.observable();
+        self.target_date = ko.observable();
+        self.product_area = ko.observable();
+        
+        self.title_errors = ko.observableArray();
+        self.description_errors = ko.observableArray();
+        self.client_errors = ko.observableArray();
+        self.client_priority_errors = ko.observableArray();
+        self.target_date_errors = ko.observableArray();
+        self.product_area_errors = ko.observableArray();
+        
+        self.show = ko.observable(false);
+        self.removeFormErrors = function() {
+            self.title_errors.removeAll();
+            self.description_errors.removeAll();
+            self.client_errors.removeAll();
+            self.client_priority_errors.removeAll();
+            self.target_date_errors.removeAll();
+            self.product_area_errors.removeAll();
+        }
+        
+        self.cleanForm = function() {
+            self.id(null)
+            self.title(null);
+            self.description(null);
+            self.client(null);
+            self.client_priority(null);
+            self.target_date(null);
+            self.product_area(null);
+            self.removeFormErrors();
+        }
+        
+        self.setForm = function(feature) {
+            self.id(feature.id())
+            self.title(feature.title());
+            self.description(feature.description());
+            self.client(feature.client());
+            self.client_priority(feature.client_priority());
+            self.target_date(feature.target_date());
+            self.product_area(feature.product_area());
+            self.removeFormErrors();
+        }
+
+        self.formErrors = function(response) {
+            self.removeFormErrors();
+
+            $.each(response.errors.title, function(i, e) {
+                self.title_errors.push(e)
+            })
+            $.each(response.errors.description, function(i, e) {
+                self.description_errors.push(e)
+            })
+            $.each(response.errors.client, function(i, e) {
+                self.client_errors.push(e)
+            })
+            $.each(response.errors.client_priority, function(i, e) {
+                self.client_priority_errors.push(e)
+            })
+            $.each(response.errors.target_date, function(i, e) {
+                self.target_date_errors.push(e)
+            })
+            $.each(response.errors.product_area, function(i, e) {
+                self.product_area_errors.push(e)
+            })
+            
+        }
+        self.saveFeature = function() {
+            if (self.id() != undefined) {
+                var new_feature = {
+                    id: self.id(),
+                    title: self.title(),
+                    description: self.description(),
+                    client: self.client(),
+                    client_priority: self.client_priority(),
+                    target_date: self.target_date(),
+                    product_area: self.product_area(),
+                }
+            }
+            else {
+                var new_feature = {
+                    title: self.title(),
+                    description: self.description(),
+                    client: self.client(),
+                    client_priority: self.client_priority(),
+                    target_date: self.target_date(),
+                    product_area: self.product_area(),
+                }
+            }
+            featuresViewModel.saveFeature(new_feature);
+        }
+    }
+    var featuresViewModel = new FeaturesViewModel();
+    var featureFormViewModel = new FeatureFormViewModel();
+    ko.applyBindings(featuresViewModel, $('#feature_list')[0]);
+    ko.applyBindings(featureFormViewModel, $('#feature_form')[0]);
+</script>
+{% endblock %}
+
+
 {% block content %}
+
+<div id="feature_list" data-bind="visible: show">
+    <table class="table table-striped">
+        <tr>
+            <td>Title</td>
+            <td>Client</td>
+            <td>Client Priority</td>
+            <td>Target Date</td>
+            <td>Product Area</td>
+            <td>Actions</td>
+        </tr>
+        <!-- ko foreach: features -->
+        <tr>
+            <td data-bind="text: title"></td>
+            <td data-bind="text: client"></td>
+            <td data-bind="text: client_priority"></td>
+            <td data-bind="text: target_date"></td>
+            <td data-bind="text: product_area"></td>
+            <td>
+                <button data-bind="click: $parent.beginEdit" class="btn btn-secondary">Edit</button>
+                <button data-bind="click: $parent.remove" class="btn btn-danger">Delete</button>
+            </td>
+        </tr>
+        <!-- /ko -->
+    </table>
+    <button data-bind="click: beginAdd" class="btn btn-primary">Add Feature</button>
+    
+</div>
+
+<div id="feature_form" data-bind="visible: show" style="display:none;">
 <p>Feature Request</p>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.title.label }}<br>
-            {{ form.title() }}
-            {% for error in form.title.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.description.label }}<br>
-            {{ form.description() }}
-            {% for error in form.description.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}        
-        </p>
-        <p>
-            {{ form.client.label }}<br>
-            {{ form.client() }}
-            {% for error in form.client.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}        
-        </p>
-        <p>
-            {{ form.client_priority.label }}<br>
-            {{ form.client_priority() }}
-            {% for error in form.client_priority.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}        
-        </p>
-        <p>
-            {{ form.target_date.label }}<br>
-            {{ form.target_date() }}
-            {% for error in form.target_date.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}        
-        </p>
-        <p>
-            {{ form.product_area.label }}<br>
-            {{ form.product_area() }}
-            {% for error in form.product_area.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}        
-        </p>
+    <form action="" method="post" novalidate class="form">
 
+        <div class="form-group">
+          <label for="title">{{ form.title.label }}</label>
+              {{ form.title(class_="form-control", **{'data-bind':'value: title'}) }}
+              <!-- ko foreach: title_errors -->
+              <span style="color: red;" data-bind="text: $data"></span>
+              <!-- /ko -->
+        </div>
 
-        <p>{{ form.submit() }}</p>
+        <div class="form-group">
+          <label for="description">{{ form.description.label }}</label>
+              {{ form.description(class_="form-control", **{'data-bind':'value: description'}) }}
+              <!-- ko foreach: description_errors -->
+              <span style="color: red;" data-bind="text: $data"></span>
+              <!-- /ko -->
+        </div>
+        
+        <div class="form-group">
+          <label for="client">{{ form.client.label }}</label>
+              {{ form.client(class_="form-control", **{'data-bind':'value: client'}) }}
+              <!-- ko foreach: client_errors -->
+              <span style="color: red;" data-bind="text: $data"></span>
+              <!-- /ko -->
+        </div>
+        
+        <div class="form-group">
+          <label for="client_priority">{{ form.client_priority.label }}</label>
+              {{ form.client_priority(class_="form-control", **{'data-bind':'value: client_priority'}) }}
+              <!-- ko foreach: client_priority_errors -->
+              <span style="color: red;" data-bind="text: $data"></span>
+              <!-- /ko -->
+
+        </div>
+        
+        <div class="form-group">
+          <label for="target_date">{{ form.target_date.label }}</label>
+              {{ form.target_date(class_="form-control", **{'data-bind':'value: target_date'}) }}
+              <!-- ko foreach: target_date_errors -->
+              <span style="color: red;" data-bind="text: $data"></span>
+              <!-- /ko -->
+
+        </div>
+        
+        <div class="form-group">
+          <label for="product_area">{{ form.product_area.label }}</label>
+              {{ form.product_area(class_="form-control", **{'data-bind':'value: product_area'}) }}
+              <!-- ko foreach: product_area_errors -->
+              <span style="color: red;" data-bind="text: $data"></span>
+              <!-- /ko -->
+
+        </div>
+        <button data-bind="click: saveFeature" class="btn btn-primary">Submit</button>
     </form>
+</div>
 {% endblock %}

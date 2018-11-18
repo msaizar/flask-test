@@ -4,7 +4,7 @@ import datetime
 from app.feature.forms import FeatureForm
 
 
-class FeatureForm:
+class TestFeatureForm:
     """Feature form"""
 
     def test_validate_success(self, db):

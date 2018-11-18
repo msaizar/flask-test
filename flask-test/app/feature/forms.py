@@ -20,7 +20,7 @@ PRODUCT_AREA_CHOICES = [
 ]
 
 
-class FeatureCreateForm(FlaskForm):
+class FeatureForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     client = SelectField('Client', choices=CLIENT_CHOICES)

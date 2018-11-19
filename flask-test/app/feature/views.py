@@ -13,6 +13,11 @@ blueprint = Blueprint('feature', __name__, static_folder='../static')
 class FeatureAPI(MethodView):
 
     def get(self, feature_id):
+        """
+        If an id is present, return the serialized feature or return a 404.
+        If not return a serialized feature list ordered by client and priority.
+        """
+
         if feature_id is None:
             return jsonify(
                 features=[i.to_json() for i in Feature.query.order_by(
@@ -30,6 +35,22 @@ class FeatureAPI(MethodView):
         return jsonify({'success': True})
 
     def process_feature(self, feature, form):
+        """
+        Add/Update a feature
+        Method to be used for post/put requests.
+
+        Find features with the new priority and count them
+
+        While there are two of them:
+            Increment the priority of the one that is not the new/last updated
+            Find features with the new priority and count them
+
+        #TODO: I'm returning all features, replacing the
+        entire array on the frontend. Ideally we should only return
+        the objects that were updated, and update only those
+        on the frontend.
+        """
+
         db.session.add(feature)
 
         client = form.client.data
@@ -38,18 +59,23 @@ class FeatureAPI(MethodView):
         feature_query = Feature.query.filter_by(
             client=client,
             client_priority=client_priority
-        ).order_by(Feature.id.asc())
+        )
         existing_features_count = feature_query.count()
 
+        last_updated = feature
+
         while existing_features_count > 1:
-            feature_to_update = feature_query.first()
+            feature_to_update = feature_query.filter(
+                Feature.id != last_updated.id
+            ).first()
             client_priority += 1
             feature_to_update.client_priority = client_priority
             feature_query = Feature.query.filter_by(
                 client=client,
                 client_priority=client_priority
-            ).order_by(Feature.id.desc())
+            )
             existing_features_count = feature_query.count()
+            last_updated = feature_to_update
 
         db.session.commit()
         return jsonify(features=[
@@ -59,6 +85,9 @@ class FeatureAPI(MethodView):
         ])
 
     def put(self, feature_id):
+        """
+        Returns all features or form errors as JSON.
+        """
         form = FeatureForm()
         if form.validate():
             feature = Feature.query.get(feature_id)
@@ -68,6 +97,9 @@ class FeatureAPI(MethodView):
             return jsonify(errors=form.errors), 400
 
     def post(self):
+        """
+        Returns all features or form errors as JSON.
+        """
         form = FeatureForm()
         if form.validate():
             feature = Feature()
@@ -79,6 +111,13 @@ class FeatureAPI(MethodView):
 
 @blueprint.route('/', methods=['GET'])
 def homepage():
+    """
+    Homepage, returns the main app frontend with the form.
+
+    #TODO: Move form to the frontend. Everything but initial display is
+    being processed there.
+    """
+
     form = FeatureForm()
     return render_template('index.html', form=form)
 

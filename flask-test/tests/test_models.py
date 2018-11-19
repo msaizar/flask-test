@@ -10,15 +10,14 @@ from .factories import FeatureFactory
 
 @pytest.mark.usefixtures('db')
 class TestFeatureModel:
-    """Feature tests."""
-    
+    """Feature Model tests."""
+
     def test_repr(self):
         feature = FeatureFactory(
             title="Title", description="Description", client="Client A",
             client_priority=1, target_date=dt.date(2020, 10, 10),
             product_area="Policies"
         )
-        db.session.commit()
         assert feature.__repr__() == '<Feature Title>'
 
     def test_to_json(self):
@@ -40,7 +39,7 @@ class TestFeatureModel:
         }
         serialized = feature.to_json()
         assert serialized == obj
-        
+
         feature = FeatureFactory(
             title="Title", description="Description", client="Client A",
             client_priority=1, target_date=None,

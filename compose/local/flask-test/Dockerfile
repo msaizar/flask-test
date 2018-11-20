@@ -14,6 +14,6 @@ COPY ./compose/local/flask-test/start.sh /start.sh
 RUN sed -i 's/\r//' /start.sh
 RUN chmod +x /start.sh
 
-WORKDIR /app
+WORKDIR /application
 
 ENTRYPOINT ["/entrypoint.sh"]

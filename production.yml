@@ -1,32 +1,39 @@
 version: '2'
 
 volumes:
-  postgres_data_local: {}
-  postgres_backup_local: {}
+  postgres_data_production: {}
+  postgres_backup_production: {}
 
+services:
   flasktest:
     build:
       context: .
-      dockerfile: ./compose/local/flasktest/Dockerfile
+      dockerfile: ./compose/production/flask-test/Dockerfile
     depends_on:
       - postgres
-    environment:
-      - POSTGRES_USER=portfolio
-      - POSTGRES_HOST=postgres
-      - POSTGRES_DB_NAME=portfolio
-      - USE_DOCKER=yes
     ports:
-      - "8000:8000"
-    command: /start.sh
+      - "5000:5000"
+    command: /gunicorn.sh
+    env_file:
+      - ./compose/production/.env
 
   postgres:
     build:
       context: .
       dockerfile: ./compose/local/postgres/Dockerfile
     volumes:
-      - postgres_data_local:/var/lib/postgresql/data
-      - postgres_backup_local:/backups
-    environment:
-      - POSTGRES_USER=portfolio
-      - POSTGRES_HOST=postgres
-      - POSTGRES_DB_NAME=portfolio
+      - postgres_data_production:/var/lib/postgresql/data
+      - postgres_backup_production:/backups
+    env_file:
+      - ./compose/production/.env
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./compose/production/nginx/Dockerfile
+    env_file:
+      - ./compose/production/.env
+    ports:
+      - "0.0.0.0:80:80"
+    depends_on:
+      - flasktest

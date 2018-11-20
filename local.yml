@@ -11,16 +11,13 @@ services:
       dockerfile: ./compose/local/flask-test/Dockerfile
     depends_on:
       - postgres
-    environment:
-      - POSTGRES_USER=portfolio
-      - POSTGRES_HOST=postgres
-      - POSTGRES_DB_NAME=portfolio
-      - FLASK_APP=flask-test/flask-test.py
+    env_file:
+      - ./.envs/local/.env
     ports:
       - "5000:5000"
     command: flask run --host=0.0.0.0
     volumes:
-      - .:/app
+      - .:/application
 
   postgres:
     build:
@@ -29,10 +26,8 @@ services:
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
       - postgres_backup_local:/backups
-    environment:
-      - POSTGRES_USER=portfolio
-      - POSTGRES_HOST=postgres
-      - POSTGRES_DB_NAME=portfolio
+    env_file:
+      - ./.envs/local/.env
 
 
 

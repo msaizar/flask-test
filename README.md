@@ -25,16 +25,18 @@ On a terminal, bring up the docker containers.
 
 `$ docker-compose -f local.yml up --build`
 
+
 Migrate the database on another terminal.
 
 `$ docker-compose -f local.yml run --rm flask-test flask db upgrade`
-
-Navigate to http://localhost:5000
 
 
 Run backend tests.
 
 `$ docker-compose -f local.yml run --rm flask-test flask test`
+
+
+You can navigate to http://localhost:5000 to use the application.
 
 
 ## Production
@@ -43,13 +45,16 @@ Copy `.envs/local/.env` to `.envs/production/.env`
 
 You'll need to make some modifications to the copied file:
 
+
 Change the `FLASK_ENV` variable to `production`.
 
 `FLASK_ENV=production`
 
+
 Change the secret key.
 
 `SECRET_KEY="not-so-secret"`
+
 
 Change the Postgres credentials.
 
@@ -62,13 +67,16 @@ Create an EC2 instance with Docker Machine. You'll need your AWS credentials con
 
 `$ docker-machine create --driver amazonec2 flasktest`
 
+
 Set your environment variables to use docker-compose with this Docker Machine.
 
 `$ eval $(docker-machine env flasktest)`
 
+
 Bring up the services.
 
 `$ docker-compose -f production.yml up --build -d`
+
 
 Get the Docker Machine's IP address and navigate to it.
 

@@ -5,8 +5,8 @@ key = 'TluxwB3fV_GWuLkR1_BzGs1Zk90TYAuhNMZP_0q4WyM='
 # Oh no! The code is going over the edge! What are you going to do?
 message = (
     b'gAAAAABb4N1rLWRgGK2vrQjEmRDBTPB8JkCmXOCBKHp5sM27EFIMCNrFE6muRDdgW6WfjB'
-    '01CSCgWtGHkz6s-zISMPzlRbl8T9t3AcfSZnQk67506vTxKSFgYX38wo7ETQRtNnM-MRM8x'
-    'MqZ6_WZFpsWyxmmhPuEoE1nUwnKpFqTkmsm42Yd-Jo=')
+    b'01CSCgWtGHkz6s-zISMPzlRbl8T9t3AcfSZnQk67506vTxKSFgYX38wo7ETQRtNnM-MRM8x'
+    b'MqZ6_WZFpsWyxmmhPuEoE1nUwnKpFqTkmsm42Yd-Jo=')
 
 
 def main():

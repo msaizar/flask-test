@@ -52,12 +52,11 @@ Change the Postgres credentials.
 `POSTGRES_DB_NAME=flasktest`
 
 
-Create an EC2 instance with Docker Machine. You'll need your AWS credentials configured.
+Create an EC2 instance with Docker Machine. You'll need your AWS credentials configured, see https://docs.docker.com/machine/examples/aws/
 `$ docker-machine create --driver amazonec2 flasktest`
 
 Set your environment variables to use docker-compose with this Docker Machine.
 `$ eval $(docker-machine env flasktest)`
-
 
 Bring up the services.
 `$ docker-compose -f production.yml up --build -d`

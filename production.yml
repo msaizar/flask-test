@@ -15,7 +15,7 @@ services:
       - "5000:5000"
     command: /gunicorn.sh
     env_file:
-      - ./compose/production/.env
+      - ./.envs/production/.env
 
   postgres:
     build:
@@ -25,14 +25,12 @@ services:
       - postgres_data_production:/var/lib/postgresql/data
       - postgres_backup_production:/backups
     env_file:
-      - ./compose/production/.env
+      - ./.envs/production/.env
 
   nginx:
     build:
       context: .
       dockerfile: ./compose/production/nginx/Dockerfile
-    env_file:
-      - ./compose/production/.env
     ports:
       - "0.0.0.0:80:80"
     depends_on:

@@ -9,7 +9,7 @@ I had no prior experience with Flask so this template was of great help. I wante
 
 I ended up using a MethodView (http://flask.pocoo.org/docs/1.0/views/#method-views-for-apis) for the API and WTForms for the form.
 
-The following tutorial helped a lot for getting up to speed with the backend: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
+The following tutorial helped a lot for getting up to speed with the backend: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world.
 The frontend is heavily based on another of his tutorials, a rather old one: https://blog.miguelgrinberg.com/post/writing-a-javascript-rest-client
 
 A lot could be improved, main points I'd work on next:

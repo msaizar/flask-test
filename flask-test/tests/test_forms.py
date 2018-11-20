@@ -8,7 +8,7 @@ class TestFeatureForm:
     """Feature form"""
 
     def test_validate_success(self, db):
-        """Register with success."""
+        """Validate the feature form."""
         form = FeatureForm(
             title='Some Title', description='Some Description',
             client='Client A', client_priority=1,

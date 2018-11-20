@@ -21,7 +21,11 @@ class TestFeatureModel:
         assert feature.__repr__() == '<Feature Title>'
 
     def test_to_json(self):
-        """Convert model to JSON."""
+        """
+        Test model serialization, with date and no date for test
+        coverage.
+        """
+
         feature = FeatureFactory(
             title="Title", description="Description", client="Client A",
             client_priority=1, target_date=dt.date(2020, 10, 10),

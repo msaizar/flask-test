@@ -10,10 +10,15 @@ from .factories import FeatureFactory
 
 class TestFeaturesAPI:
     """
-    Features API tests.
+    Features API endpoint tests.
     """
 
     def test_get_list(self, db, testapp):
+        """
+        Test feature list endpoint, make sure the
+        correct number of items are returned
+        """
+
         res = testapp.get('/features/')
         result = res.json
         assert res.status_int == 200
@@ -26,6 +31,11 @@ class TestFeaturesAPI:
         assert len(result['features']) == 2
 
     def test_get_single(self, db, testapp):
+        """
+        get single feature endpoint, 404 if no feature is found,
+        200 and feature if it found
+        """
+
         res = testapp.get('/features/1', status=404)
         feature_1 = FeatureFactory()
         db.session.commit()
@@ -36,7 +46,8 @@ class TestFeaturesAPI:
         assert res.status_int == 200
 
     def test_post_invalid(self, db, testapp):
-        # Goes to homepage
+        """post empty feature, check that all errors are there"""
+
         res = testapp.post('/features/', status=400)
         result = res.json
         assert 'errors' in result
@@ -49,6 +60,8 @@ class TestFeaturesAPI:
         assert res.status_int == 400
 
     def test_post_valid(self, db, testapp):
+        """post valid feature, returns 200"""
+
         res = testapp.post('/features/', {
             'title': 'Some Title', 'client': 'Client A',
             'client_priority': '1', 'target_date': '2020-10-10',
@@ -57,6 +70,8 @@ class TestFeaturesAPI:
         assert res.status_int == 200
 
     def test_put_valid(self, db, testapp):
+        """update valid feature, returns 200"""
+
         feature_1 = FeatureFactory()
         db.session.commit()
         res = testapp.put('/features/1', {
@@ -67,6 +82,8 @@ class TestFeaturesAPI:
         assert res.status_int == 200
 
     def test_put_invalid(self, db, testapp):
+        """udpate invalid feature, returns 400, check all errors are there"""
+
         feature_1 = FeatureFactory()
         db.session.commit()
         res = testapp.put('/features/1', status=400)
@@ -81,6 +98,10 @@ class TestFeaturesAPI:
         assert res.status_int == 400
 
     def test_delete(self, db, testapp):
+        """
+        delete single feature endpoint, 404 if no feature is found,
+        200 if found
+        """
         res = testapp.delete('/features/1', status=404)
         feature_1 = FeatureFactory()
         res = testapp.delete('/features/1')
